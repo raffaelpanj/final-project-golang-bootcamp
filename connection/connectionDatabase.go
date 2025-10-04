@@ -64,6 +64,30 @@ func SelectAllUsersByRole(role string)([]models.User, error){
 	return results, nil
 }
 
+func InsertUser(name string, email string, password string, role string) (string, error){
+	var user_id string
+	sqlStatement := `
+		INSERT INTO users (nama, email, password, role)
+		VALUES ($1, $2, $3, $4)
+		RETURNING user_id;
+	`
+	err = Db.QueryRow(sqlStatement, name, email, password, role).Scan(&user_id)
+	if err != nil {
+		return "", err
+	}
+	return user_id, nil
+}
+
+func SelectUser(email string)(models.User, error){
+	var user models.User
+	sqlStatement := `SELECT * FROM users WHERE email=$1`
+	err := Db.QueryRow(sqlStatement, email).Scan(&user.ID,&user.Name,&user.Email,&user.Password,&user.CreatedAt,&user.Role)
+	if err != nil {
+		return models.User{}, err
+	}
+	return user, nil
+}
+
 func InsertEvent(eventCode string, nama string, lokasi string, date string, quota int, description string) (string, error) {
 	var event_id string
 	layout := "2006-01-02"
