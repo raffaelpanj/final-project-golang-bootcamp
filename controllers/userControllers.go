@@ -28,6 +28,11 @@ func GetUserbyRole(ctx *gin.Context){
 		})
 		return
 	}
+
+	for i := range users {
+		users[i].Password = "****"
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"users": users,
 	})
