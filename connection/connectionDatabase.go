@@ -195,6 +195,26 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 	return orderId, nil
 }
 
+func SelectOrdersByUserId(userId string) ([]models.Order, error){
+	var results []models.Order
+	sqlStatement := `SELECT order_id, event_id, user_id, total_price, payment_method FROM orders WHERE user_id = $1`
+	rows, err := Db.Query(sqlStatement, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next(){
+		var order = models.Order{}
+		err = rows.Scan(&order.OrderID, &order.EventID, &order.UserID, &order.TotalPrice, &order.PaymentMethod)
+		if err != nil {
+			panic(err)
+		}
+		results = append(results, order)
+	}
+	return results, nil
+}
+
 func GetEventCode(eventId int) (string, error) {
 	var eventCode string
 	sqlStatement := `SELECT event_code FROM events WHERE event_id=$1`
@@ -204,7 +224,7 @@ func GetEventCode(eventId int) (string, error) {
 	}
 	return eventCode, nil
 }
-func InsertQueue(userId int, eventId int, status string) (models.Queue, error) {
+func InsertQueue(userId string, eventId string, status string) (models.Queue, error) {
 	var queue models.Queue
 	var lastNumber = 0
 	sqlCheckLastNumber := `SELECT queue_number FROM queues WHERE event_id = $1 ORDER BY queue_number DESC LIMIT 1`
@@ -221,4 +241,81 @@ func InsertQueue(userId int, eventId int, status string) (models.Queue, error) {
 		return queue, err
 	}
 	return queue, nil
+}
+
+func UpdateQueueById(id string, status string) (int64, error){
+	sqlStatement := `
+	UPDATE queues SET status = $1
+	WHERE queue_id = $2`
+	result, err := Db.Exec(sqlStatement, status, id)
+	if err != nil {
+		return 0, err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return rowsAffected, nil
+}
+
+func GetQueueById(id string) (models.Queue, error) {
+	var queue models.Queue
+	sqlStatement := `SELECT queue_id, user_id, queue_number, event_id, status FROM queues WHERE queue_id = $1`
+	err := Db.QueryRow(sqlStatement, id).Scan(&queue.QueueID, &queue.UserID, &queue.QueueNumber, &queue.EventID, &queue.Status)
+	if err != nil {
+		return queue, err
+	}
+	return queue, nil
+}
+
+func GetQueueByEventIdAndStatus(eventId string, status string) ([]models.Queue, error){
+	var results []models.Queue
+
+	sqlStatement := `SELECT queue_id, user_id, queue_number, event_id, status FROM queues WHERE event_id = $1 and status = $2`
+	rows, err := Db.Query(sqlStatement, eventId, status)
+
+		if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next(){
+		var queue = models.Queue{}
+		err = rows.Scan(&queue.QueueID, &queue.UserID, &queue.QueueNumber, &queue.EventID, &queue.Status)
+		if err != nil {
+			panic(err)
+		}
+		results = append(results, queue)
+	}
+	return results, nil
+}
+
+func SelectTicketByOrderId(orderId string) ([]models.Ticket, error){
+	var results []models.Ticket
+	sqlStatement := `SELECT ticket_id, order_id, ticket_number, price FROM tickets WHERE order_id = $1`
+	rows, err := Db.Query(sqlStatement, orderId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next(){
+		var ticket = models.Ticket{}
+		err = rows.Scan(&ticket.TicketID, &ticket.OrderID, &ticket.TicketNumber, &ticket.Price)
+		if err != nil {
+			panic(err)
+		}
+		results = append(results, ticket)
+	}
+	return results, nil
+}
+
+func SelectTicketById(ticketId string) (models.Ticket, error){
+	var ticket = models.Ticket{}
+	sqlStatement := `SELECT ticket_id, order_id, ticket_number, price FROM tickets WHERE ticket_id=$1`
+	err := Db.QueryRow(sqlStatement, ticketId).Scan(&ticket.TicketID, &ticket.OrderID, &ticket.TicketNumber, &ticket.Price)
+	if err != nil {
+		return ticket, err
+	}
+	return ticket, nil
 }

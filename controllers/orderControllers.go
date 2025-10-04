@@ -43,3 +43,16 @@ func CreateOrder(ctx *gin.Context) {
 		"order_id": orderId,
 	})
 }
+
+func GetOrderByUserId(ctx *gin.Context){
+	userId := ctx.Query("user_id")
+	var orderData []Order
+	var err error
+	if orderData, err = connection.SelectOrdersByUserId(userId); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve orders",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, orderData)
+}

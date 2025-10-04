@@ -10,6 +10,10 @@ import (
 
 type Event = models.Event
 var EventDatas = [] Event{}
+
+type UpdateEvent = models.UpdateEvent
+var UpdateEventDatas = [] UpdateEvent{}
+
 var err error
 
 func CreateEvent(ctx *gin.Context){
@@ -51,9 +55,9 @@ func GetEventById(ctx *gin.Context){
 
 // we just can update for increasing quota, not decreasing and will be handle by Front End
 // and you cant update eventcode
-func UpdateEvent(ctx *gin.Context){
+func UpdateEventById(ctx *gin.Context){
 	eventId := ctx.Param("EventID")
-	var updatedEvent Event
+	var updatedEvent UpdateEvent
 	if err := ctx.ShouldBindJSON(&updatedEvent); err != nil {
         ctx.JSON(http.StatusBadRequest, gin.H{
             "error": "Invalid request",
