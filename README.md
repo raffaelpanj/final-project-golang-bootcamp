@@ -47,16 +47,16 @@ Method	Endpoint	Description	Auth
 POST	/register/customer	Register a new customer	❌ Public
 POST	/register/admin	Register a new admin	❌ Public
 POST	/login	Log in and get JWT token	❌ Public
-
 🎫 EventController
+
 Manage event data (CRUD operations).
 
 Method	Endpoint	Description	Auth
 POST	/events	Create a new event	🔒 Admin
 GET	/events/:EventID	Get event by ID	✅ Authenticated
 PUT	/events/:EventID	Update event by ID	🔒 Admin
-
 ⏳ QueueController
+
 Handles user queues for events.
 
 Method	Endpoint	Description	Auth
@@ -64,26 +64,26 @@ POST	/queues	Create a new queue for an event	✅ Authenticated
 PUT	/queues/:QueueID	Update queue status (e.g., waiting → served)	🔒 Admin
 GET	/queues/:QueueID	Get queue by queue ID	✅ Authenticated
 GET	/queues?event_id={id}&status={status}	Get all queues filtered by event ID and status	🔒 Admin
-
 🛒 OrderController
+
 Handles user orders and ticket generation.
 
 Method	Endpoint	Description	Auth
 POST	/orders	Create a new order (generate tickets)	✅ Authenticated
 GET	/orders?user_id={id}	Get all orders by user ID	✅ Authenticated
-
 🎟️ TicketController
+
 Retrieve ticket information by order or ticket ID.
 
 Method	Endpoint	Description	Auth
 GET	/tickets?order_id={id}	Get tickets by order ID	✅ Authenticated
 GET	/tickets/:TicketID	Get ticket by ticket ID	✅ Authenticated
-
 👥 UserController
+
 Retrieve users by role (for admin management).
 
 Method	Endpoint	Description	Auth
-GET	/users/role/:UserRole	Get all users with a specific role (admin / customer)	🔒 Admin
+GET	/users/role/:UserRole	Get all users with a specific role (admin / customer)
 
 
 ## 🔄 End-to-End Flow Overview
