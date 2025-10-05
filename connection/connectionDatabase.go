@@ -127,6 +127,13 @@ func UpdateEventById(id string, nama string, location string, date string, quota
 	if err != nil {
 		return 0, err
 	}
+	sqlStatmentCheckQuota := `SELECT quota FROM events WHERE event_id=$1`
+	var currentQuota int
+	err = Db.QueryRow(sqlStatmentCheckQuota, id).Scan(&currentQuota)
+	if err != nil || currentQuota > quota {
+		return 99, err
+	}
+
 	sqlStatement := `
 	UPDATE events SET nama = $1, location = $2, date = $3,
 	quota = $4, description = $5

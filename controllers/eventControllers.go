@@ -72,7 +72,14 @@ func UpdateEventById(ctx *gin.Context){
 		})
 		return
 	}
-		if rowsAffected == 0 {
+	if rowsAffected == 99 {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error_status": "Internal Server Error",
+			"error_message": "Quota cannot be decreased",
+		})
+		return
+	}
+	if rowsAffected == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"error_status": "Data Not Found",
 			"error_message": fmt.Sprintf("Event with id %s not found", eventId),
