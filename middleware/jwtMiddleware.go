@@ -4,13 +4,15 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Sama kayak secret key yang kamu pakai waktu generate token
-var jwtKey = []byte("secretKey")
+
+var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+
 
 // Struct untuk claim JWT
 type Claims struct {

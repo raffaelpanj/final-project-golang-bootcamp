@@ -6,25 +6,24 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"os"
 
 	_ "github.com/lib/pq"
-)
-const (
-	host	= "localhost"
-	port 	= 5432
-	user	= "postgres"
-	password= "2010512058"
-	dbname	= "db-events-sql"
 )
 
 var(
 	Db *sql.DB
 	err error
-	logger = log.Default()
 )
 
 func ConnectDB() {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
 	Db, err = sql.Open("postgres", psqlInfo)
@@ -54,7 +53,7 @@ func SelectAllUsersByRole(role string)([]models.User, error){
 		var user = models.User{}
 		err = rows.Scan(&user.ID,&user.Name,&user.Email,&user.Password,&user.CreatedAt,&user.Role)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		results = append(results, user)
 	}
@@ -211,9 +210,18 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 	UPDATE events 
 	SET quota = quota - $1 
 	WHERE event_id = $2 AND quota >= $1`
-	_, err = tx.Exec(sqlUpdateEventQuota, ticketCount, eventId)
+	res, err := tx.Exec(sqlUpdateEventQuota, ticketCount, eventId)
 	if err != nil {
 		return "", err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return "", err
+	}
+	
+	if rowsAffected == 0 {
+		return "", fmt.Errorf("not enough quota")
 	}
 
 	err = tx.Commit()

@@ -5,7 +5,8 @@ import (
 	"final-project-golang-bootcamp/models"
 	"net/http"
 	"github.com/gin-gonic/gin"
-	"fmt"
+	"log"
+	"time"
 )
 
 type Event = models.Event
@@ -21,19 +22,37 @@ func CreateEvent(ctx *gin.Context){
 
 	if err := ctx.ShouldBindJSON(&newEvent); err != nil {
         ctx.JSON(http.StatusBadRequest, gin.H{
-            "error": "Invalid request",
+            "error": "Bad request",
         })
+		log.Printf("[ERROR] Failed Error: %v", err)
         return
     }
+
+	layout := "2006-01-02"
+	_, err := time.Parse(layout, newEvent.Date)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid date format, must be YYYY-MM-DD"})
+		return
+	}
+
+
 
 	newEvent.EventID, err = connection.InsertEvent(newEvent.EventCode, newEvent.Name, newEvent.Location, newEvent.Date, newEvent.Quota, newEvent.Description)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error_status": "Internal Server Error",
-			"error_message": err.Error(),
+			"error_message": "Please use unique event code or valid Quota",
 		})
+		log.Printf("[ERROR] Failed to insert event: %v", err)
 		return
 	}
+
+	timeNow := time.Now()
+	timeNowStr := timeNow.Format("2006-01-02 15:04:05")
+	newEvent.CreatedAt = timeNowStr
+
+
 	EventDatas = append(EventDatas, newEvent)
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Event created successfully",
@@ -48,8 +67,8 @@ func GetEventById(ctx *gin.Context){
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"error_status": "Data Not Found",
-			"error_message": fmt.Sprintf("Event with id %s not found", eventId),
 		})
+		log.Printf("[ERROR] Failed Error: %v", err)
 		return
 	}
 		ctx.JSON(http.StatusOK, gin.H{
@@ -70,7 +89,7 @@ func UpdateEventById(ctx *gin.Context){
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error_status": "Internal Server Error",
-			"error_message": err.Error(),
+			"error_message": "Bad Request or Data Not Found",
 		})
 		return
 	}
@@ -84,8 +103,8 @@ func UpdateEventById(ctx *gin.Context){
 	if rowsAffected == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"error_status": "Data Not Found",
-			"error_message": fmt.Sprintf("Event with id %s not found", eventId),
 		})
+		log.Printf("[ERROR] Failed Error: %v", err)
 		return
 	}
 	updatedEvent.EventID = eventId

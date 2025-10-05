@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"fmt"
+	"log"
 )
 type Queue = models.Queue
 var QueueDatas = [] Queue{}
@@ -21,6 +22,7 @@ func CreateQueue(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid request",
 		})
+		log.Printf("[ERROR] Failed Error: %v", err)
 		return
 	}
 	returnQueue, err := connection.InsertQueue(newQueue.UserID, newQueue.EventID, newQueue.Status)
@@ -28,6 +30,7 @@ func CreateQueue(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to create queue",
 		})
+		log.Printf("[ERROR] Failed Error: %v", err)
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{
@@ -48,9 +51,9 @@ func UpdateQueueById(ctx *gin.Context) {
 	rowsAffected, err := connection.UpdateQueueById(queueId, updatedQueue.Status)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to update queue",
-			"error_message": err.Error(),
+			"error": "Failed to update queue, check your status value",
 		})
+		log.Printf("[ERROR] Failed Error: %v", err)
 		return
 	}
 	if rowsAffected == 0 {
@@ -95,6 +98,12 @@ func GetQueuesByEventIdAndStatus(ctx *gin.Context){
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error_status": "Internal Server Error",
 			"error_message": err.Error(),
+		})
+		return
+	}
+	if queues == nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error_status": "Bad Request or Data Not Found",
 		})
 		return
 	}

@@ -22,6 +22,7 @@ func CreateOrder(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid request",
 		})
+		log.Printf("[ERROR] Failed Error: %v", err)
 		return
 	}
 	eventCode, err := connection.SelectEventCodeById(newOrderRequest.EventID)
@@ -34,11 +35,18 @@ func CreateOrder(ctx *gin.Context) {
 	logger.Println("Event Code:", eventCode) // Log the retrieved event code
 	orderId, err := connection.InsertOrder(newOrderRequest.UserID, newOrderRequest.EventID, newOrderRequest.TicketCount, newOrderRequest.PaymentMethod, newOrderRequest.TotalPrice, eventCode)
 	if err != nil {
+		if err.Error() == "not enough quota" {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": "Not enough quota",
+			})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to create order",
 		})
 		return
 	}
+
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Order created successfully",
 		"order_id": orderId,

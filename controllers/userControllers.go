@@ -28,6 +28,13 @@ func GetUserbyRole(ctx *gin.Context){
 		})
 		return
 	}
+	if users == nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error_status": "Data Not Found",
+			"error_message": "No users found with the specified role",
+		})
+		return
+	}
 
 	for i := range users {
 		users[i].Password = "****"
