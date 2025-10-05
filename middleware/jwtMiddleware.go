@@ -10,21 +10,21 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-
+// Retrieve JWT secret key from environment variables
 var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
-
-// Struct untuk claim JWT
+// Claims struct defines the payload structure of the JWT token
 type Claims struct {
 	UserID int    `json:"user_id"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-// Middleware untuk validasi token JWT
+// AuthMiddleware validates JWT tokens and (optionally) checks user roles
 func AuthMiddleware(requiredRole ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Ambil token dari header
+
+		// Get the token from the Authorization header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
@@ -32,7 +32,7 @@ func AuthMiddleware(requiredRole ...string) gin.HandlerFunc {
 			return
 		}
 
-		// Format header harus: Bearer <token>
+		// The header format must be: Bearer <token>
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
@@ -40,7 +40,7 @@ func AuthMiddleware(requiredRole ...string) gin.HandlerFunc {
 			return
 		}
 
-		// Parse token
+		// Parse the JWT token and extract claims
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
@@ -51,14 +51,14 @@ func AuthMiddleware(requiredRole ...string) gin.HandlerFunc {
 			return
 		}
 
-		// Cek expired manual (biar lebih aman)
+		// Manually check expiration for extra security
 		if claims.ExpiresAt.Time.Before(time.Now()) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
 			c.Abort()
 			return
 		}
 
-		// Cek role (kalau middleware dikasih role tertentu)
+		// Check if user role matches one of the required roles (if provided)
 		if len(requiredRole) > 0 {
 			match := false
 			for _, role := range requiredRole {
@@ -74,10 +74,11 @@ func AuthMiddleware(requiredRole ...string) gin.HandlerFunc {
 			}
 		}
 
-		// Simpan data user di context biar bisa diakses controller
+		// Store user data in context so it can be accessed by controllers
 		c.Set("user_id", claims.UserID)
 		c.Set("role", claims.Role)
 
+		// Continue to the next middleware or handler
 		c.Next()
 	}
 }

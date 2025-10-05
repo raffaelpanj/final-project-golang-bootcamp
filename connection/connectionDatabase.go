@@ -7,7 +7,6 @@ import (
 	"log"
 	"time"
 	"os"
-
 	_ "github.com/lib/pq"
 )
 
@@ -16,6 +15,7 @@ var(
 	err error
 )
 
+// ConnectDB establishes a connection to the PostgreSQL database using environment variables.
 func ConnectDB() {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
@@ -39,6 +39,7 @@ func ConnectDB() {
 	fmt.Println("Connected to the database!")
 }
 
+// SelectAllUsersByRole retrieves all users with a specific role.
 func SelectAllUsersByRole(role string)([]models.User, error){
 	var results []models.User
 	sqlStatement := `SELECT * FROM users WHERE role=$1`
@@ -60,6 +61,7 @@ func SelectAllUsersByRole(role string)([]models.User, error){
 	return results, nil
 }
 
+// InsertUser adds a new user to the users table and returns the generated user_id.
 func InsertUser(name string, email string, password string, role string) (string, error){
 	var user_id string
 	sqlStatement := `
@@ -74,6 +76,7 @@ func InsertUser(name string, email string, password string, role string) (string
 	return user_id, nil
 }
 
+// SelectUser retrieves a single user by email.
 func SelectUser(email string)(models.User, error){
 	var user models.User
 	sqlStatement := `SELECT * FROM users WHERE email=$1`
@@ -84,6 +87,7 @@ func SelectUser(email string)(models.User, error){
 	return user, nil
 }
 
+// InsertEvent inserts a new event into the events table.
 func InsertEvent(eventCode string, nama string, lokasi string, date string, quota int, description string) (string, error) {
 	var event_id string
 	layout := "2006-01-02"
@@ -102,6 +106,7 @@ func InsertEvent(eventCode string, nama string, lokasi string, date string, quot
 	return event_id, nil
 }
 
+// SelectEventById retrieves a single event by its event_id.
 func SelectEventById(id string) (models.Event, error){
 	var event = models.Event{}
 	var createdAt time.Time
@@ -117,6 +122,7 @@ func SelectEventById(id string) (models.Event, error){
 	return event, nil
 }
 
+// UpdateEventById updates event details by event_id.
 func UpdateEventById(id string, nama string, location string, date string, quota int, description string) (int64, error){
 	layout := "2006-01-02"
 	dateTime, err := time.Parse(layout, date)
@@ -146,7 +152,7 @@ func UpdateEventById(id string, nama string, location string, date string, quota
 	return rowsAffected, nil
 }
 
-
+// InsertOrder creates an order and corresponding tickets in a transaction.
 func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string, totalPrice int, eventCode string) (string, error) {
 	tx, err := Db.Begin()
 	var orderId string
@@ -156,7 +162,7 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 	}
 	defer tx.Rollback()
 
-	// Insert to Order table
+	// Insert order data
 	sqlInsertOrder := `
 	INSERT INTO orders (user_id, event_id, total_price, payment_method)
 	VALUES ($1, $2, $3, $4) RETURNING order_id`
@@ -165,7 +171,7 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 		return "", err
 	}
 
-	//Insert to Tickets table
+	// Check last ticket number for the event
 	var lastTicket string
 	sqlCheckLastTicketNumber := `
 	SELECT ticket_number FROM tickets 
@@ -186,7 +192,7 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 		fmt.Sscanf(lastTicket, eventCode+"%d", &lastNumber)
 	}
 	
-
+	// Insert tickets for the order
 	sqlInsertTickets := `
 	INSERT INTO tickets (order_id, ticket_number, price)
 	VALUES ($1, $2, $3)`
@@ -205,7 +211,7 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 		}
 	}
 
-	// Update Events Quota
+	// Update remaining event quota
 	sqlUpdateEventQuota := `
 	UPDATE events 
 	SET quota = quota - $1 
@@ -219,7 +225,7 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 	if err != nil {
 		return "", err
 	}
-	
+
 	if rowsAffected == 0 {
 		return "", fmt.Errorf("not enough quota")
 	}
@@ -231,6 +237,7 @@ func InsertOrder(userId int, eventId int, ticketCount int, paymentMethod string,
 	return orderId, nil
 }
 
+// SelectOrdersByUserId retrieves all orders for a specific user.
 func SelectOrdersByUserId(userId string) ([]models.Order, error){
 	var results []models.Order
 	sqlStatement := `SELECT order_id, event_id, user_id, total_price, payment_method FROM orders WHERE user_id = $1`
@@ -251,6 +258,7 @@ func SelectOrdersByUserId(userId string) ([]models.Order, error){
 	return results, nil
 }
 
+// SelectEventCodeById retrieves an event_code by event_id.
 func SelectEventCodeById(eventId int) (string, error) {
 	var eventCode string
 	sqlStatement := `SELECT event_code FROM events WHERE event_id=$1`
@@ -260,6 +268,8 @@ func SelectEventCodeById(eventId int) (string, error) {
 	}
 	return eventCode, nil
 }
+
+// InsertQueue inserts a new queue entry for an event.
 func InsertQueue(userId string, eventId string, status string) (models.Queue, error) {
 	var queue models.Queue
 	var lastNumber = 0
@@ -279,6 +289,7 @@ func InsertQueue(userId string, eventId string, status string) (models.Queue, er
 	return queue, nil
 }
 
+// UpdateQueueById updates the status of a queue by its ID.
 func UpdateQueueById(id string, status string) (int64, error){
 	sqlStatement := `
 	UPDATE queues SET status = $1
@@ -294,6 +305,7 @@ func UpdateQueueById(id string, status string) (int64, error){
 	return rowsAffected, nil
 }
 
+// GetQueueById retrieves queue data by queue_id.
 func GetQueueById(id string) (models.Queue, error) {
 	var queue models.Queue
 	sqlStatement := `SELECT queue_id, user_id, queue_number, event_id, status FROM queues WHERE queue_id = $1`
@@ -304,6 +316,7 @@ func GetQueueById(id string) (models.Queue, error) {
 	return queue, nil
 }
 
+// GetQueueByEventIdAndStatus retrieves queues for an event filtered by status.
 func GetQueueByEventIdAndStatus(eventId string, status string) ([]models.Queue, error){
 	var results []models.Queue
 
@@ -326,6 +339,7 @@ func GetQueueByEventIdAndStatus(eventId string, status string) ([]models.Queue, 
 	return results, nil
 }
 
+// SelectTicketByOrderId retrieves tickets related to an order.
 func SelectTicketByOrderId(orderId string) ([]models.Ticket, error){
 	var results []models.Ticket
 	sqlStatement := `SELECT ticket_id, order_id, ticket_number, price FROM tickets WHERE order_id = $1`
@@ -346,6 +360,7 @@ func SelectTicketByOrderId(orderId string) ([]models.Ticket, error){
 	return results, nil
 }
 
+// SelectTicketById retrieves a ticket by its ticket_id.
 func SelectTicketById(ticketId string) (models.Ticket, error){
 	var ticket = models.Ticket{}
 	sqlStatement := `SELECT ticket_id, order_id, ticket_number, price FROM tickets WHERE ticket_id=$1`

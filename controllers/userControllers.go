@@ -8,11 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Alias for User model
 type User = models.User
+
+// Temporary in-memory data (not used directly with database)
 var UserDatas = []User{}
 
+// GetUserbyRole handles GET request to retrieve all users by their role
 func GetUserbyRole(ctx *gin.Context){
     role := ctx.Param("UserRole")
+
+	// Validate that role parameter is provided
     if role == "" {
         ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
             "error_status":  "Bad Request",
@@ -20,6 +26,8 @@ func GetUserbyRole(ctx *gin.Context){
         })
         return
     }
+
+	// Fetch all users from database filtered by role
 	users, err := connection.SelectAllUsersByRole(role)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -28,6 +36,8 @@ func GetUserbyRole(ctx *gin.Context){
 		})
 		return
 	}
+
+	// Handle case when no users are found
 	if users == nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"error_status": "Data Not Found",
@@ -36,10 +46,12 @@ func GetUserbyRole(ctx *gin.Context){
 		return
 	}
 
+	// Mask passwords before sending the response
 	for i := range users {
 		users[i].Password = "****"
 	}
 
+	// Return success response with user data
 	ctx.JSON(http.StatusOK, gin.H{
 		"users": users,
 	})
