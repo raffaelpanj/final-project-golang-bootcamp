@@ -28,7 +28,11 @@ func CreateEvent(ctx *gin.Context){
 
 	newEvent.EventID, err = connection.InsertEvent(newEvent.EventCode, newEvent.Name, newEvent.Location, newEvent.Date, newEvent.Quota, newEvent.Description)
 	if err != nil {
-		panic(err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error_status": "Internal Server Error",
+			"error_message": err.Error(),
+		})
+		return
 	}
 	EventDatas = append(EventDatas, newEvent)
 	ctx.JSON(http.StatusCreated, gin.H{
@@ -53,8 +57,6 @@ func GetEventById(ctx *gin.Context){
 	})
 }
 
-// we just can update for increasing quota, not decreasing and will be handle by Front End
-// and you cant update eventcode
 func UpdateEventById(ctx *gin.Context){
 	eventId := ctx.Param("EventID")
 	var updatedEvent UpdateEvent

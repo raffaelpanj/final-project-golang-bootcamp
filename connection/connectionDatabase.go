@@ -4,13 +4,10 @@ import (
 	"database/sql"
 	"final-project-golang-bootcamp/models"
 	"fmt"
-
-	_ "github.com/lib/pq"
+	"log"
 	"time"
 
-	// "os"
-	"log"
-	// "final-project-golang-bootcamp/models"
+	_ "github.com/lib/pq"
 )
 const (
 	host	= "localhost"
@@ -246,7 +243,7 @@ func SelectOrdersByUserId(userId string) ([]models.Order, error){
 	return results, nil
 }
 
-func GetEventCode(eventId int) (string, error) {
+func SelectEventCodeById(eventId int) (string, error) {
 	var eventCode string
 	sqlStatement := `SELECT event_code FROM events WHERE event_id=$1`
 	err := Db.QueryRow(sqlStatement, eventId).Scan(&eventCode)

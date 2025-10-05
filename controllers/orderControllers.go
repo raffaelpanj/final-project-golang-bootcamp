@@ -3,9 +3,10 @@ package controllers
 import (
 	"final-project-golang-bootcamp/connection"
 	"final-project-golang-bootcamp/models"
-	"net/http"
-	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 type Order = models.Order
 var OrderDatas = [] Order{}
@@ -23,7 +24,7 @@ func CreateOrder(ctx *gin.Context) {
 		})
 		return
 	}
-	eventCode, err := connection.GetEventCode(newOrderRequest.EventID)
+	eventCode, err := connection.SelectEventCodeById(newOrderRequest.EventID)
 	if err != nil {
 	ctx.JSON(http.StatusInternalServerError, gin.H{
 		"error": "Failed to create order",
