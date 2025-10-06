@@ -118,7 +118,7 @@ Retrieve users by role (for admin management).
 
 🔹 Register New Customer
 
-POST /register/customer
+POST /users/registerCustomer
 ```json
 {
   "name": "CustomerHandsome",
@@ -139,7 +139,7 @@ POST /register/customer
 
 🔹 Register New Admin
 
-POST /register/admin
+POST /users/registerAdmin
 ```json
 {
   "name": "AdminHandsome",
@@ -158,7 +158,7 @@ POST /register/admin
 
 🔹 Login
 
-POST /login
+POST /users/login
 ```json
 {
   "email": "raffael@example.com",
@@ -178,7 +178,8 @@ POST /login
 
 🔹 Create Event (Admin Only)
 
-POST /events
+POST /event
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ```json
@@ -213,7 +214,8 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Event by ID
 
-GET /events/:EventID
+GET /event/:EventID
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
@@ -235,7 +237,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Update Event (Admin Only)
 
-PUT /events/:EventID
+PUT /event/:EventID
+
+PUT /event/1
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ```json
@@ -269,7 +274,8 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Create Queue
 
-POST /queues
+POST /createQueue
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ```json
@@ -298,7 +304,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Update Queue (Admin Only)
 
-PUT /queues/:QueueID
+PUT /queue/:QueueID
+
+PUT /queue/1
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ```json
@@ -322,7 +331,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Queue by ID
 
-GET /queues/:9
+GET /queue/:QueueID
+
+GET /queue/1
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
@@ -341,7 +353,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Queues by Event & Status (Admin Only)
 
-GET /queues?event_id=26&status=served
+GET /queues?event_id=X&status=X
+
+GET /queues?event_id=1&status=served
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
@@ -363,7 +378,8 @@ Header: Authorization: Bearer <JWT_TOKEN>
 🛒 Order Endpoints
 🔹 Create Order
 
-POST /orders
+POST /createOrder
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ```json
@@ -388,7 +404,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Orders by User ID
 
-GET /orders?user_id=4
+GET /order?user_id=X
+
+GET /order?user_id=1
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
@@ -409,7 +428,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Ticket by Order ID
 
-GET /tickets?order_id=4
+GET /ticket?order_id=X
+
+GET /ticket?order_id=1
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
@@ -436,7 +458,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Ticket by Ticket ID
 
-GET /tickets/:TicketID
+GET /ticket/:TicketID
+
+GET /ticket/1
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
@@ -455,7 +480,10 @@ Header: Authorization: Bearer <JWT_TOKEN>
 👥 User Endpoints (Admin Only)
 🔹 Get Users by Role
 
-GET /users/role/:UserRole
+GET /users/:UserRole
+
+GET /users/customer
+
 Header: Authorization: Bearer <JWT_TOKEN>
 
 ✅ Response
