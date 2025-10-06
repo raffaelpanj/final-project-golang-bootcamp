@@ -39,6 +39,15 @@ go run main.go
 http://localhost:8080
 ```
 ## Full API Endpoint List
+
+If you want to try my program, you can try this api url below. 
+
+But, if this API url not works anymore, maybe my hosting time already expired 😁
+
+```
+baseAPI = https://final-project-golang-event-management.up.railway.app/
+```
+
 🧑‍💼 AuthController
 
 Handles registration and login for both customers and admins.
