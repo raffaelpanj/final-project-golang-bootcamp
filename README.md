@@ -45,9 +45,9 @@ Handles registration and login for both customers and admins.
 
 | Method   | Endpoint             | Description              | Auth     |
 | :------- | :------------------- | :----------------------- | :------- |
-| **POST** | `/register/customer` | Register a new customer  | ❌ Public |
-| **POST** | `/register/admin`    | Register a new admin     | ❌ Public |
-| **POST** | `/login`             | Log in and get JWT token | ❌ Public |
+| **POST** | `/users/registerCustomer` | Register a new customer  | ❌ Public |
+| **POST** | `/users/registerAdmin`    | Register a new admin     | ❌ Public |
+| **POST** | `/users/login`             | Log in and get JWT token | ❌ Public |
 
 🎫 EventController
 
@@ -55,9 +55,9 @@ Manage event data (CRUD operations).
 
 | Method   | Endpoint           | Description        | Auth            |
 | :------- | :----------------- | :----------------- | :-------------- |
-| **POST** | `/events`          | Create a new event | 🔒 Admin        |
-| **GET**  | `/events/:EventID` | Get event by ID    | ✅ Authenticated |
-| **PUT**  | `/events/:EventID` | Update event by ID | 🔒 Admin        |
+| **POST** | `/event`          | Create a new event | 🔒 Admin        |
+| **GET**  | `/event/:EventID` | Get event by ID    | ✅ Authenticated |
+| **PUT**  | `/event/:EventID` | Update event by ID | 🔒 Admin        |
 
 ⏳ QueueController
 
@@ -65,10 +65,10 @@ Handles user queues for events.
 
 | Method   | Endpoint                                | Description                                    | Auth            |
 | :------- | :-------------------------------------- | :--------------------------------------------- | :-------------- |
-| **POST** | `/queues`                               | Create a new queue for an event                | ✅ Authenticated |
-| **PUT**  | `/queues/:QueueID`                      | Update queue status (e.g., waiting → served)   | 🔒 Admin        |
-| **GET**  | `/queues/:QueueID`                      | Get queue by queue ID                          | ✅ Authenticated |
-| **GET**  | `/queues?event_id={id}&status={status}` | Get all queues filtered by event ID and status | 🔒 Admin        |
+| **POST** | `/createQueue`                               | Create a new queue for an event                | ✅ Authenticated |
+| **PUT**  | `/queue/:QueueID`                      | Update queue status (e.g., waiting → served)   | 🔒 Admin        |
+| **GET**  | `/queue/:QueueID`                      | Get queue by queue ID                          | ✅ Authenticated |
+| **GET**  | `/queue?event_id={id}&status={status}` | Get all queues filtered by event ID and status | ✅ Authenticated |
 
 🛒 OrderController
 
@@ -76,8 +76,8 @@ Handles user orders and ticket generation.
 
 | Method   | Endpoint               | Description                           | Auth            |
 | :------- | :--------------------- | :------------------------------------ | :-------------- |
-| **POST** | `/orders`              | Create a new order (generate tickets) | ✅ Authenticated |
-| **GET**  | `/orders?user_id={id}` | Get all orders by user ID             | ✅ Authenticated |
+| **POST** | `/createOrder`              | Create a new order (generate tickets) | 🔒 Admin       |
+| **GET**  | `/order?user_id={id}` | Get all orders by user ID             | ✅ Authenticated |
 
 🎟️ TicketController
 
@@ -85,8 +85,8 @@ Retrieve ticket information by order or ticket ID.
 
 | Method  | Endpoint                 | Description             | Auth            |
 | :------ | :----------------------- | :---------------------- | :-------------- |
-| **GET** | `/tickets?order_id={id}` | Get tickets by order ID | ✅ Authenticated |
-| **GET** | `/tickets/:TicketID`     | Get ticket by ticket ID | ✅ Authenticated |
+| **GET** | `/ticket?order_id={id}` | Get tickets by order ID | ✅ Authenticated |
+| **GET** | `/ticket/:TicketID`     | Get ticket by ticket ID | ✅ Authenticated |
 
 👥 UserController
 
@@ -94,22 +94,22 @@ Retrieve users by role (for admin management).
 
 | Method  | Endpoint                | Description                                           | Auth     |
 | :------ | :---------------------- | :---------------------------------------------------- | :------- |
-| **GET** | `/users/role/:UserRole` | Get all users with a specific role (admin / customer) | 🔒 Admin |
+| **GET** | `/users/:UserRole` | Get all users with a specific role (admin / customer) | 🔒 Admin |
 
 
 
 ## 🔄 End-to-End Flow Overview
 | Step | Action               | Endpoint                           | Description                            |
 | :--: | :------------------- | :--------------------------------- | :------------------------------------- |
-|  1️⃣ | **Register & Login** | `/register` → `/login`             | User registers and obtains a JWT token |
-|      |                      |                                    |you can try create as Admin And User for| 
+|  1️⃣ | **Register & Login** | `/users/registerCustomer` or         | User registers and obtains a JWT token |
+|      |                      |  `/users/registerAdmin` → `/login` |you can try create as Admin And User for| 
 |      |                      |                                    |better experience                                        |
-|  2️⃣ | **Create Event**     | `POST /events`                     | Admin creates a new event              |
-|  3️⃣ | **Create Queue**     | `POST /queues`                     | User joins an event queue              |
-|  4️⃣ | **Create Order**     | `POST /orders`                     | User makes an order after being served |
-|  5️⃣ | **Update Queue**     | `PUT /queues/:QueueID`             | Admin updates queue status to “served” |
-|  6️⃣ | **Get Ticket**       | `GET /tickets?order_id=<order_id>` | User retrieves generated tickets       |
-|  7️⃣ | **Get Orders**       | `GET /orders?user_id=<user_id>`    | User retrieves all their orders        |
+|  2️⃣ | **Create Event**     | `POST /event`                     | Admin creates a new event              |
+|  3️⃣ | **Create Queue**     | `POST /createQueue`                     | User joins an event queue              |
+|  4️⃣ | **Create Order**     | `POST /createOrder`                     | User makes an order after being served |
+|  5️⃣ | **Update Queue**     | `PUT /queue/:QueueID`             | Admin updates queue status to “served” |
+|  6️⃣ | **Get Ticket**       | `GET /ticket?order_id=<order_id>` | User retrieves generated tickets       |
+|  7️⃣ | **Get Orders**       | `GET /order?user_id=<user_id>`    | User retrieves all their orders        |
 
 
 ## 🧩 Example and Request API
