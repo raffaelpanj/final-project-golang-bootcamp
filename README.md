@@ -362,9 +362,9 @@ Header: Authorization: Bearer <JWT_TOKEN>
 
 🔹 Get Queues by Event & Status (Admin Only)
 
-GET /queues?event_id=X&status=X
+GET /queue?event_id=X&status=X
 
-GET /queues?event_id=1&status=served
+GET /queue?event_id=1&status=served
 
 Header: Authorization: Bearer <JWT_TOKEN>
 
